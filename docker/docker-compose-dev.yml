@@ -1,0 +1,40 @@
+version: "3.1"
+
+services:
+  web:
+    container_name: "${NAME_PREFIX}-web"
+    hostname: "${NAME_PREFIX}-web"
+    build:
+      context: ./php
+    ports:
+      - "${IP}:${PORT_WEB}:80"
+    volumes:
+      - "../app:/var/www/app"
+    working_dir: /var/www/app
+    restart: always
+  db:
+    container_name: "${NAME_PREFIX}-mysql"
+    hostname: ${DB_HOST_NAME}
+    image: mysql:8.0.27
+    restart: always
+    volumes:
+        - "mysql_data_volume:/var/lib/mysql"
+        - "./db:/docker-entrypoint-initdb.d"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}"
+    ports:
+      - "${IP}:${PORT_DB}:3306"
+  phpmyadmin:
+    container_name: "${NAME_PREFIX}-phpmyadmin"
+    hostname: "${NAME_PREFIX}-phpmyadmin"
+    image: phpmyadmin/phpmyadmin:5.1.1
+    restart: always
+    ports:
+      - "${IP}:${PORT_PHPMYADMIN}:80"
+    environment:
+      - "PMA_HOST=${DB_HOST_NAME}"
+      - "PMA_USER=root"
+      - "PMA_PASSWORD=${DB_ROOT_PASSWORD}"
+volumes:
+  mysql_data_volume:
+    name: "${NAME_PREFIX}-mysql-volume"
